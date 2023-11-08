@@ -7,15 +7,38 @@ export default class App extends React.Component {
     super();
     this.state = {
       todos: [],
+      todoNameInput: "",
         }
   }
+
+  onTodoNameInputChange = evt => {
+    const { value } = evt.target
+    this.setState({...this.state, todoNameInput: value})
+  }
+
+  postNewTodo = () => {
+    axios.post(URL, {name: this.state.todoNameInput})
+    .then(res => {
+      this.fetchAllTodos()
+      this.setState({...this.state, todoNameInput: ""})
+    })
+    .catch(err => {
+      this.setState({...this.state, error: err.response.data.message})
+    })
+  }
+
+  handleSubmit = (e) => {
+    e.preventDefault()
+    this.postNewTodo()
+  }
+
   fetchAllTodos = () => {
     axios.get(URL)
     .then(res => {
       this.setState({...this.state, todos: res.data.data})
     })
     .catch(err => {
-      debugger
+      this.setState({...this.state, error: err.response.data.message})
     })
   }
 
@@ -26,17 +49,18 @@ this.fetchAllTodos()
   render() {
     return (
       <div>
-        <div id="error">Error: no error here</div>
+        {this.state.error && <div id="error">{this.state.error}</div>}
         <div id = "todos">
       {this.state.todos.map(todo => {
         return <div key={todo.id}>{todo.name}</div>
       })}
         </div>
-        <form id="todoForm">
-          <input type="text" placeholder="Type todo"></input>
+        <form onSubmit = {this.handleSubmit} id="todoForm">
+          <input value={this.state.todoNameInput} onChange={this.onTodoNameInputChange} type="text" placeholder="Type todo"></input>
           <input type="submit"></input>
-          <button>Clear Completed</button>
+
         </form>
+        <button>Clear Completed</button>
       </div>
     )
   }
