@@ -47,6 +47,17 @@ export default class App extends React.Component {
     })
   }
 
+
+  toggleCompleted = id => evt => {
+    axios.patch(`${URL}/${id}`)
+    .then(res => this.setState({...this.state, todos: this.state.todos.map(td => {
+      if(td.id !== id){return td}
+      else if(td.id === id){return res.data.data}
+    })}))
+    .catch(err => {debugger})
+  }
+
+
   componentDidMount(){
 this.fetchAllTodos()
 
@@ -57,7 +68,7 @@ this.fetchAllTodos()
         {this.state.error && <div id="error">{this.state.error}</div>}
         <div id = "todos">
       {this.state.todos.map(todo => {
-        return <div key={todo.id}>{todo.name}</div>
+        return <div onClick={this.toggleCompleted(todo.id)} key={todo.id}>{todo.name}{todo.completed ? "☑️" : ""}</div>
       })}
         </div>
         <form onSubmit = {this.handleSubmit} id="todoForm">
